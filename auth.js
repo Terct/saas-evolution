@@ -2,13 +2,16 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const dotenv = require('dotenv'); // Importe a biblioteca dotenv
+// Carregue as variáveis de ambiente do arquivo .env
+dotenv.config();
 
 const app = express();
 const port = 3000;
 
 app.use(express.json());
 
-mongoose.connect('mongodb://admin:Mfcd62!!Mfcd62!!@85.239.239.3:23743/mydatabase?authSource=admin&readPreference=primary&ssl=false&directConnection=true', {
+mongoose.connect(process.env.MONGODB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
@@ -18,7 +21,6 @@ db.on('error', console.error.bind(console, 'Erro de conexão ao MongoDB:'));
 db.once('open', () => {
   console.log('Conectado ao MongoDB sem especificar o banco de dados');
   // Especificar o banco de dados
-  const dbName = 'SAAS_Evolution';
   const UserSchema = new mongoose.Schema({
     name: String,
     email: String,
