@@ -7,7 +7,7 @@ const dotenv = require('dotenv'); // Importe a biblioteca dotenv
 dotenv.config();
 
 const app = express();
-const port = 3000;
+const port = 4323;
 
 app.use(express.json());
 
