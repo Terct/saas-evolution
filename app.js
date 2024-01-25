@@ -26,6 +26,8 @@ db.once('open', () => {
     email: String,
     pass: String,
     status_plan: String,
+    instanciaName: String,  
+    instanciaApikey: String,
   });
 
   const User = mongoose.model('User', UserSchema, 'users');
@@ -52,28 +54,34 @@ db.once('open', () => {
     }
   });
 
-  // Autenticação de usuário (login)
   app.post('/login', async (req, res) => {
     const { email, pass } = req.body;
-
+  
     try {
       const user = await User.findOne({ email });
-
+  
       if (!user) {
         return res.status(404).send('Usuário não encontrado');
       }
-
+  
       const isPasswordValid = await bcrypt.compare(pass, user.pass);
-
+  
       if (!isPasswordValid) {
         return res.status(401).send('Senha inválida');
       }
+  
 
-      const token = jwt.sign({ email: user.email }, 'your-secret-key', {
+
+      const token = jwt.sign({ userId: user._id, email: user.email }, process.env.JWT_SECRET, {
         expiresIn: '1h',
       });
 
-      res.status(200).json({ token });
+
+      const intancia = user.instanciaName
+      const apikey = user.instanciaApikey
+
+
+      res.status(200).json({ token, intancia, apikey });
     } catch (error) {
       res.status(500).send('Erro durante o login');
     }
