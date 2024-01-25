@@ -26,8 +26,10 @@ db.once('open', () => {
     email: String,
     pass: String,
     status_plan: String,
-    instanciaName: String,  
+    instanciaName: String,
     instanciaApikey: String,
+    retuneChat: String,
+    retuneApikey: String,
   });
 
   const User = mongoose.model('User', UserSchema, 'users');
@@ -56,20 +58,20 @@ db.once('open', () => {
 
   app.post('/login', async (req, res) => {
     const { email, pass } = req.body;
-  
+
     try {
       const user = await User.findOne({ email });
-  
+
       if (!user) {
         return res.status(404).send('Usuário não encontrado');
       }
-  
+
       const isPasswordValid = await bcrypt.compare(pass, user.pass);
-  
+
       if (!isPasswordValid) {
         return res.status(401).send('Senha inválida');
       }
-  
+
 
 
       const token = jwt.sign({ userId: user._id, email: user.email }, process.env.JWT_SECRET, {
@@ -77,17 +79,69 @@ db.once('open', () => {
       });
 
 
-      const intancia = user.instanciaName
+      const instancia = user.instanciaName
       const apikey = user.instanciaApikey
 
 
-      res.status(200).json({ token, intancia, apikey });
+      res.status(200).json({ token, instancia, apikey });
     } catch (error) {
       res.status(500).send('Erro durante o login');
     }
   });
 
+
+  app.post('/set-retune', async (req, res) => {
+    const { instancia, apikey, chat, apikeyChat } = req.body;
+
+    try {
+      // Procurar o usuário com base nos valores de instancia e apikey
+      const user = await User.findOne({ instanciaName: instancia, instanciaApikey: apikey });
+
+      if (!user) {
+        return res.status(404).send('Usuário não encontrado para a instância e apikey fornecidas');
+      }
+
+      // Adicionar os novos valores às colunas retuneChat e retuneApikey
+      user.retuneChat = chat;
+      user.retuneApikey = apikeyChat;
+
+      // Salvar as alterações no banco de dados
+      await user.save();
+
+      res.status(200).json({ message: 'Valores adicionados com sucesso' });
+    } catch (error) {
+      console.error('Erro durante a adição dos valores:', error);
+      res.status(500).send('Erro durante a adição dos valores');
+    }
+  });
+
+
+
+
+  app.post('/webhooks/messages-upsert', async (req, res) => {
+    
+  
+    try {
+    
+      console.log(req.body)
+
+    } catch (error) {
+      console.error('Erro durante a adição dos valores:', error);
+      res.status(500).send('Erro durante a adição dos valores');
+    }
+  });
+  
+
+
   app.listen(port, () => {
     console.log(`Servidor está rodando em http://localhost:${port}`);
   });
 });
+
+
+
+
+
+
+
+
