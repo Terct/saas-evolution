@@ -112,6 +112,15 @@ db.once('open', () => {
       // Salvar as alterações no banco de dados
       await user.save();
 
+
+
+
+      // Excluir o arquivo JSON
+      const filePath = path.join(__dirname, `./src/retune/threadId/${instancia}/data.json`);
+
+      await fs.unlink(filePath);
+
+
       res.status(200).json({ message: 'Valores adicionados com sucesso' });
     } catch (error) {
       console.error('Erro durante a adição dos valores:', error);
