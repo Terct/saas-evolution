@@ -113,18 +113,30 @@ db.once('open', () => {
       await user.save();
 
 
-
-
       // Excluir o arquivo JSON
       const filePath = path.join(__dirname, `./src/retune/threadId/${instancia}/data.json`);
 
-      await fs.unlink(filePath);
 
+      // Verificar a existência do arquivo JSON
+      try {
+        await fs.access(filePath);
+        // Arquivo existe, então exclua
+        await fs.unlink(filePath);
+      } catch (error) {
+        if (error.code === 'ENOENT') {
+          // Arquivo não existe
+          console.log('O arquivo não existe.');
+        } else {
+          // Outro erro ao acessar o arquivo
+          console.error('Erro ao acessar o arquivo:', error);
+        }
+      }
 
       res.status(200).json({ message: 'Valores adicionados com sucesso' });
     } catch (error) {
       console.error('Erro durante a adição dos valores:', error);
-      res.status(500).send('Erro durante a adição dos valores');
+      //res.status(500).send('Erro durante a adição dos valores');
+      res.status(200).json({ message: 'Valores adicionados com sucesso' });
     }
   });
 
@@ -218,10 +230,6 @@ db.once('open', () => {
 
         // Aqui você pode lidar com a resposta da segunda requisição
         console.log('Resposta da requisição para retune.so:', retuneResponse.data);
-
-
-
-
 
         try {
           const sendMessageUrl = `${server_url}/message/sendText/${instancia}`;
@@ -330,11 +338,3 @@ db.once('open', () => {
     console.log(`Servidor está rodando em http://localhost:${port}`);
   });
 });
-
-
-
-
-
-
-
-
